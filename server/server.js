@@ -57,7 +57,7 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
-app.length("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send({ message: "Service is live." });
 });
 
