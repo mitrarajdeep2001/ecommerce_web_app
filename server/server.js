@@ -57,6 +57,10 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
+app.length("/", (req, res) => {
+  res.send({ message: "Service is live." });
+});
+
 app.listen(PORT, () =>
   console.log(`[⚡⚡]=> Server is running on port ${PORT}`)
 );
