@@ -59,11 +59,6 @@ export const checkAuth = createAsyncThunk(
   "/auth/checkauth",
 
   async () => {
-    console.log(
-      import.meta.env.VITE_BACKEND_BASE_URL,
-      "${import.meta.env.VITE_BACKEND_BASE_URL}"
-    );
-
     const response = await axios.get(
       `${process.env.VITE_BACKEND_BASE_URL}/api/auth/check-auth`,
       {

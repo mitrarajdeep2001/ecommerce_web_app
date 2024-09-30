@@ -11,22 +11,47 @@ import shopSearchSlice from "./shop/search-slice";
 import shopReviewSlice from "./shop/review-slice";
 import commonFeatureSlice from "./common-slice";
 
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+import { combineReducers } from "redux";
 
-    adminProducts: adminProductsSlice,
-    adminOrder: adminOrderSlice,
+// Combine all your reducers
+const rootReducer = combineReducers({
+  auth: authReducer,
 
-    shopProducts: shopProductsSlice,
-    shopCart: shopCartSlice,
-    shopAddress: shopAddressSlice,
-    shopOrder: shopOrderSlice,
-    shopSearch: shopSearchSlice,
-    shopReview: shopReviewSlice,
+  adminProducts: adminProductsSlice,
+  adminOrder: adminOrderSlice,
 
-    commonFeature: commonFeatureSlice,
-  },
+  shopProducts: shopProductsSlice,
+  shopCart: shopCartSlice,
+  shopAddress: shopAddressSlice,
+  shopOrder: shopOrderSlice,
+  shopSearch: shopSearchSlice,
+  shopReview: shopReviewSlice,
+
+  commonFeature: commonFeatureSlice,
 });
+
+// Redux persist configuration
+const persistConfig = {
+  key: "root",
+  storage, // Using localStorage as the default storage
+  whitelist: ["auth"], // Add the reducers you want to persist
+};
+
+// Create a persisted reducer
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// Configure store with the persisted reducer
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, // Disable serializable check for redux-persist
+    }),
+});
+
+// Create a persistor
+export const persistor = persistStore(store);
 
 export default store;
