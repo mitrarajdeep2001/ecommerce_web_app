@@ -54,19 +54,19 @@ function AdminDashboard() {
       <ProductImageUpload
         imageFile={imageFile}
         setImageFile={setImageFile}
-        uploadedImageUrl={uploadedImageUrl}
-        setUploadedImageUrl={setUploadedImageUrl}
-        setImageLoadingState={setImageLoadingState}
         imageLoadingState={imageLoadingState}
         isCustomStyling={true}
-        // isEditMode={currentEditedId !== null}
       />
       <Button
-        disabled={!imageFile}
+        disabled={!imageFile || imageLoadingState}
         onClick={uploadImageToCloudinary}
         className={`mt-5 w-full ${!imageFile ? "opacity-50" : "opacity-100"}`}
       >
-        Upload
+        {imageLoadingState ? (
+            <span class="loader"></span>
+        ) : (
+          "Upload"
+        )}
       </Button>
       <div className="flex flex-col gap-4 mt-5">
         {featureImageList && featureImageList.length > 0
