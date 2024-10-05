@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
 import { addProductFormElements } from "@/config";
+import { uploadImageToCloudinary } from "@/lib/utils";
 import {
   addNewProduct,
   deleteProduct,
@@ -36,7 +37,7 @@ function AdminProducts() {
     useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [result, setUploadedImageUrl] = useState("");
   const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
 
@@ -44,41 +45,55 @@ function AdminProducts() {
   const dispatch = useDispatch();
   const { toast } = useToast();
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
+    setImageLoadingState(true); // Start loading state for the image
 
-    currentEditedId !== null
-      ? dispatch(
-          editProduct({
-            id: currentEditedId,
-            formData,
-          })
-        ).then((data) => {
-          console.log(data, "edit");
+    // Upload the image to Cloudinary
+    let result = '';
+    if(imageFile){
+     result = await uploadImageToCloudinary(imageFile);
+    }
 
-          if (data?.payload?.success) {
-            dispatch(fetchAllProducts());
-            setFormData(initialFormData);
-            setOpenCreateProductsDialog(false);
-            setCurrentEditedId(null);
-          }
+    // Update the form data with the uploaded image URL
+    const updatedFormData = { ...formData, image: result };
+
+    if (currentEditedId !== null) {
+      // Edit existing product
+      const editResponse = await dispatch(
+        editProduct({
+          id: currentEditedId,
+          formData: updatedFormData,
         })
-      : dispatch(
-          addNewProduct({
-            ...formData,
-            image: uploadedImageUrl,
-          })
-        ).then((data) => {
-          if (data?.payload?.success) {
-            dispatch(fetchAllProducts());
-            setOpenCreateProductsDialog(false);
-            setImageFile(null);
-            setFormData(initialFormData);
-            toast({
-              title: "Product add successfully",
-            });
-          }
-        });
+      );
+
+      // Check if the edit was successful
+      if (editResponse?.payload?.success) {
+        dispatch(fetchAllProducts()); // Refresh product list
+        resetForm(); // Reset form and state
+        toast({ title: "Product edited successfully" }); // Show success toast
+      }
+    } else {
+      // Add new product
+      const addResponse = await dispatch(addNewProduct(updatedFormData));
+
+      // Check if the product was added successfully
+      if (addResponse?.payload?.success) {
+        dispatch(fetchAllProducts()); // Refresh product list
+        resetForm(); // Reset form and state
+        toast({ title: "Product added successfully" }); // Show success toast
+      }
+    }
+
+    setImageLoadingState(false); // Stop loading state after the operation completes
+  }
+
+  function resetForm() {
+    // Reset form and state after successful operation
+    setFormData(initialFormData);
+    setOpenCreateProductsDialog(false);
+    setCurrentEditedId(null);
+    setImageFile(null);
   }
 
   function handleDelete(getCurrentProductId) {
@@ -90,17 +105,16 @@ function AdminProducts() {
   }
 
   function isFormValid() {
-    return Object.keys(formData)
-      .filter((currentKey) => currentKey !== "averageReview")
-      .map((key) => formData[key] !== "")
-      .every((item) => item);
+    // return Object.keys(formData)
+    //   .filter((currentKey) => currentKey !== "averageReview")
+    //   .map((key) => formData[key] !== "")
+    //   .every((item) => item);
+    return true;
   }
 
   useEffect(() => {
     dispatch(fetchAllProducts());
   }, [dispatch]);
-
-  console.log(formData, "productList");
 
   return (
     <Fragment>
@@ -139,11 +153,8 @@ function AdminProducts() {
           <ProductImageUpload
             imageFile={imageFile}
             setImageFile={setImageFile}
-            uploadedImageUrl={uploadedImageUrl}
-            setUploadedImageUrl={setUploadedImageUrl}
-            setImageLoadingState={setImageLoadingState}
             imageLoadingState={imageLoadingState}
-            isEditMode={currentEditedId !== null}
+            // isEditMode={currentEditedId !== null}
           />
           <div className="py-6">
             <CommonForm

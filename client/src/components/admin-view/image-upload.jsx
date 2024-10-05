@@ -8,7 +8,6 @@ import { Skeleton } from "../ui/skeleton";
 function ProductImageUpload({
   imageFile,
   setImageFile,
-  imageLoadingState,
   isEditMode,
   isCustomStyling = false,
 }) {
