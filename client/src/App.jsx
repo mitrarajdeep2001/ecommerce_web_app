@@ -1,4 +1,6 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
+import { animateScroll as scroll } from "react-scroll";
+import { debounce } from "lodash";
 import AuthLayout from "./components/auth/layout";
 import AuthLogin from "./pages/auth/login";
 import AuthRegister from "./pages/auth/register";
@@ -32,6 +34,21 @@ function App() {
   // useEffect(() => {
   //   dispatch(checkAuth());
   // }, [dispatch]);
+
+  const location = useLocation();
+  useEffect(() => {
+    const handleScroll = debounce(() => {
+      // scroll.scrollToTop({
+      //   duration: 300,
+      //   smooth: "easeIn",
+      // });
+      window.scrollTo(0, 0);
+    }, 300); // Adjust debounce time
+
+    handleScroll();
+
+    return () => handleScroll.cancel(); // Cleanup on unmount
+  }, [location]);
 
   if (isLoading) return <Skeleton className="w-[800] bg-black h-[600px]" />;
 
